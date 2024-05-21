@@ -23,7 +23,7 @@ RTC_AlarmTypeDef sAlarm;  // have to be Global  !!!!!
 void Systick_Proc(void) {	
 	static int sysCount;
 	if (sysCount %1000 == 0) {
-		watter.flag.send_time = 1;	
+		//watter.flag.send_time = 1;	
 	}
 	if ((sysCount % UART_CMD_PROCESSING_TIME_MS) == 0) {
 		watter.flag.uart_check_rx = 1;	
@@ -52,14 +52,22 @@ void Send_Time(void) {
 	
 	HAL_RTC_GetTime(&hrtc, &sTime,              RTC_FORMAT_BIN);// RTC_FORMAT_BCD
 	HAL_RTC_GetDate(&hrtc, &sDate,              RTC_FORMAT_BIN);                  
-	HAL_RTC_GetAlarm(&hrtc,&sAlarm,RTC_ALARM_A, RTC_FORMAT_BIN);                  
+	HAL_RTC_GetAlarm(&hrtc,&sAlarm,RTC_ALARM_A, RTC_FORMAT_BIN);    
 	
-	sprintf(buf,"Date %02d-%02d-20%d Time %02d:%02d:%02d  Alarm Time %02d:%02d:%02d    Hot:%d    Cold:%d%c", 
-						sDate.Date, sDate.Month, sDate.Year,
+//  Not Correct Year
+//	sprintf(buf,"Date %02d-%02d-20%d Time %02d:%02d:%02d  Alarm Time %02d:%02d:%02d    Hot:%d    Cold:%d%c", 
+//						sDate.Date, sDate.Month, sDate.Year,
+//						sTime.Hours, sTime.Minutes, sTime.Seconds, 
+//						sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,
+//						watter.input.hot_count, watter.input.cold_count,
+//						13);
+	
+	sprintf(buf,"Date %02d-%02d Time %02d:%02d:%02d  Alarm Time %02d:%02d:%02d    Hot:%d    Cold:%d%c", 
+						sDate.Date, sDate.Month, //sDate.Year,
 						sTime.Hours, sTime.Minutes, sTime.Seconds, 
 						sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,
 						watter.input.hot_count, watter.input.cold_count,
-						13);
+						13);	
 	
 	HAL_UART_Transmit(&huart2, (uint8_t *)&buf, strlen(buf), 1000);	
 }
