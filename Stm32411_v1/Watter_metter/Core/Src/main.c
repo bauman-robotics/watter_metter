@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "rtc.h"
 #include "usart.h"
 #include "gpio.h"
@@ -48,6 +49,7 @@
 
 /* USER CODE BEGIN PV */
 watter_type watter;
+void InitAll(void);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,11 +94,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_RTC_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-	watter.input.old_cold_state = 1;
-	watter.input.old_hot_state = 1;
+	InitAll();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

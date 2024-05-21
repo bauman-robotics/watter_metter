@@ -1,10 +1,13 @@
 #include "main.h"
+#include "uartProcessing.h"
 
 extern watter_type watter;
 extern UART_HandleTypeDef huart2;
 extern RTC_HandleTypeDef hrtc;
 
-char buf[MAX_LEN_COM_PORT_SEND] = {};
+static char buf[MAX_LEN_COM_PORT_SEND] = {};
+	
+extern cmd_s_type rx_cmd;
 
 void Processing(void);
 void Send_Time(void); 
@@ -13,11 +16,15 @@ void ButtonsProcessing(void);
 //====================================
 	
 void Systick_Proc(void) {	
-	static int count;
-	if (count %1000 == 0) {
-		watter.flag.send_time = 1;	
+	static int sysCount;
+	if (sysCount %1000 == 0) {
+		//watter.flag.send_time = 1;	
 	}
-	count++;
+	if ((sysCount % UART_CMD_PROCESSING_TIME_MS) == 0) {
+		watter.flag.uart_check_rx = 1;	
+	}	
+	
+	sysCount++;
 }
 //====================================
 
@@ -25,6 +32,10 @@ void Processing(void) {
 	if (watter.flag.send_time) {
 		watter.flag.send_time = 0;	
 		Send_Time();			
+	}
+	if (watter.flag.uart_check_rx) {
+		watter.flag.uart_check_rx = 0;
+		CmdRxProcessing(&rx_cmd, &watter);
 	}
 	ButtonsProcessing();
 }

@@ -11,4 +11,11 @@
 #define BUTTONS_DEBOUNCE_TIME_MS (3)
 //-----------
 
+//UART CMD
+#define RX_CMD_BUFF_SIZE (100)
+#define TX_ANS_BUFF_SIZE (2400)
+#define TIME_FOR_DEFINE_LAST_BYTE_MS (1)  
+#define UART_CMD_PROCESSING_TIME_MS  (1) 
+//-----------
+
 #endif 
