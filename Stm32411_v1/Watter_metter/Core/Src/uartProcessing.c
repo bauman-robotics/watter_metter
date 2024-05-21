@@ -21,6 +21,9 @@ void Send_Cmd_Code_Zero_Len_Answer(void);
 void Send_Unknown_Cmd_Code_Answer(char * cmdCode);
 void StartUartLog(cmd_s_type * rx_cmd);
 
+void SetDate(uint32_t iDate);
+void Send_Time(void); 
+
 char log_str0[70];
 char log_str1[70]; 
 char log_str2[130];
@@ -160,12 +163,15 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
 		
 			Send_Ok_Answer_Param(cmdCode, iCmdParam);
 			rx_cmd->f_cmd_received = 0;	
+			SetDate(iCmdParam);
 			return;
 		} 
 		//========== No Param ====
 		if ((strncmp(cmdCode, strGetTime, cmdCodeLen) == 0) && (cmdParamLen == 0)) { 
 		
 			Send_Ok_Answer(cmdCode);
+			Send_Time();
+			
 			rx_cmd->f_cmd_received = 0;	
 			return;
 		}
