@@ -62,6 +62,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define ESP_POWER_Pin GPIO_PIN_13
+#define ESP_POWER_GPIO_Port GPIOC
 #define HOT_IN_Pin GPIO_PIN_0
 #define HOT_IN_GPIO_Port GPIOA
 #define COLD_IN_Pin GPIO_PIN_1
@@ -69,6 +71,11 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
+//=== ESP_POWER ===
+#define ESP_OFF     (HAL_GPIO_WritePin(ESP_POWER_GPIO_Port, ESP_POWER_Pin, 1))
+#define ESP_ON      (HAL_GPIO_WritePin(ESP_POWER_GPIO_Port, ESP_POWER_Pin, 0))
+#define ESP_TOGGLE  (HAL_GPIO_TogglePin(ESP_POWER_GPIO_Port, ESP_POWER_Pin))
+//=================
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

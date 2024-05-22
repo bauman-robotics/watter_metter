@@ -5,23 +5,24 @@
 	#include "defines.h"
 	
 //====================================	
-	typedef struct{
-		bool send_time;
-		bool send_alarm;
-		bool uart_check_rx;
-	} flag_type;
+typedef struct{
+	bool send_time;
+	bool send_alarm;
+	bool uart_check_rx;
+	bool esp_ctrl;
+} flag_type;
 //====================================
 	
-	typedef struct{
-		uint32_t cold_count;
-		uint32_t hot_count;
-		int hot_state;
-		int cold_state;
-		
-		int old_hot_state;
-		int old_cold_state;
-		
-	} input_type;
+typedef struct{
+	uint32_t cold_count;
+	uint32_t hot_count;
+	int hot_state;
+	int cold_state;
+	
+	int old_hot_state;
+	int old_cold_state;
+	
+} input_type;
 //====================================
 	
 typedef struct {
@@ -29,6 +30,13 @@ typedef struct {
 	uint32_t lastCounter;		
 	bool startFindLastByte;		
 } lastByteDefStype;
+//====================================
+	
+typedef struct {
+	uint32_t timeOn;
+	uint32_t workMs;
+	bool 	 isOn;
+} espPowerType;
 //====================================
 
 typedef struct {
@@ -46,9 +54,10 @@ typedef struct {
 } cmd_s_type;	
 //====================================
 
-	typedef struct{
-		flag_type flag;
-		input_type input;
-	} watter_type;
+typedef struct{
+	flag_type flag;
+	input_type input;
+	espPowerType esp;
+} watter_type;
 //====================================
 #endif 	

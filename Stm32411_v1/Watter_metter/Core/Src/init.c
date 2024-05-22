@@ -14,4 +14,7 @@ void InitAll(void) {
 	HAL_UART_Receive_IT(&huart2, (uint8_t*)rx_cmd.rx_buff, RX_CMD_BUFF_SIZE);
 	
 	StartUartLog(&rx_cmd);
+	
+	watter.esp.workMs = ESP_ON_TIME_MS;
 }
+

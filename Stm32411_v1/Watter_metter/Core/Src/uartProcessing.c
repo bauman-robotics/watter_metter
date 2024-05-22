@@ -22,64 +22,34 @@ void Send_Unknown_Cmd_Code_Answer(char * cmdCode);
 void StartUartLog(cmd_s_type * rx_cmd);
 
 void SetDate(uint32_t iDate);
-void Send_Time(void); 
+void SetTime(uint32_t iTime);
+void Set_Alarm_Time(uint32_t iTime);
 
-char log_str0[70];
-char log_str1[70]; 
-char log_str2[130];
-char log_str3[70];
-char log_str4[70];
-char log_str5[70];
-char log_str6[70];
-char log_str7[70];
-char log_str8[70];
-char log_str9[70];
-char log_str10[70];
-char log_str11[70];
-char log_str12[70];
-char log_str13[70];
-char log_str14[70];
-char log_str15[70];
-char log_str16[70];
-char log_str17[70];
-char log_str18[70];
-char log_str19[70];
-char log_str20[70];
-char log_str21[70];
-char log_str22[70];
-char log_str23[70];
-char log_str24[70];
-char log_str25[70];
-char log_str26[70];
-char log_str27[70];
-char log_str28[70];
-char log_str29[70];
-char log_str30[70];
-char log_str31[70];
-char log_str32[70];
-char log_str33[70];
-char log_str34[70];
-char log_str35[70];
-char log_str36[70];
-char log_str37[70];
-char log_str38[70];
-char log_str39[70];
-char log_str40[70];
-char log_str41[70];
+void Set_ESP_On_Time_ms(uint32_t iTime);
+void Get_ESP_On_Time_ms(void);
 
-// char strWho[] = "Who"; // identification of port Cmd
-// char strDsk[] = "Dsk"; // Ask Start Count
+void Send_Hot_Ticks(void);
+void Send_Cold_Ticks(void);
 
-char strSetTime[]      = "set_time";  
-char strSetDate[]      = "set_date"; 
-char strSetAlarmTime[] = "set_alarm_time";
-char strSetAlarmDate[] = "set_alarm_date";
+void Send_Date_Time(void); 
+void Send_Alarm_Time(void);	
 
-char strGetTime[]      = "get_time";
-char strGetDate[]      = "get_date"; 
-char strGetAlarmTime[] = "get_alarm_time";
-char strGetAlarmDate[] = "get_alarm_date";
 
+char log_str[30][80];
+
+char strSetTime[]       = "set_time";  
+char strSetDate[]       = "set_date"; 
+char strSetAlarmTime[]  = "set_alarm_time";
+char strSetAlarmDate[]  = "set_alarm_date";
+char strSetEspOnTime[]  = "set_esp_on_ms";	
+			    
+char strGetDateTime[]   = "get_time";
+char strGetAlarmTime[]  = "get_alarm_time";
+char strGetAlarmDate[]  = "get_alarm_date";
+char strGetEspOnTime[]  = "get_esp_on_ms";	
+
+char strGetHotTicks[]   = "get_hot"; 
+char strGetColdTicks[] = "get_cold"; 
 //====================================
 void Send_Ok_Answer_Param(char * cmdCode, int iCmdParam) {
 	sprintf(buf, "%s%s%d%c" , "Cmd Ok -- ",  cmdCode, iCmdParam, 13);
@@ -149,39 +119,74 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
 			iCmdParam = GetCmdParam(cmdParam);		
 		}
 		// cmdParam[]
-		// cmdParamLen					
-		// ===========================================================
+		// cmdParamLen	
 		
-		if ((strncmp(cmdCode, strSetTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
-			
+		// ==== Set Time =======================================================		
+		if ((strncmp(cmdCode, strSetTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 			
 			Send_Ok_Answer_Param(cmdCode, iCmdParam);
-			rx_cmd->f_cmd_received = 0;	
+			rx_cmd->f_cmd_received = 0;
+			SetTime(iCmdParam);	
+			//Send_Date_Time();	
 			return;
 		} 
-		//==========	
-		if ((strncmp(cmdCode, strSetDate, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
 		
+		// ==== Set Date =======================================================
+		if ((strncmp(cmdCode, strSetDate, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
 			Send_Ok_Answer_Param(cmdCode, iCmdParam);
 			rx_cmd->f_cmd_received = 0;	
 			SetDate(iCmdParam);
 			return;
 		} 
-		//========== No Param ====
-		if ((strncmp(cmdCode, strGetTime, cmdCodeLen) == 0) && (cmdParamLen == 0)) { 
 		
-			Send_Ok_Answer(cmdCode);
-			Send_Time();
-			
+		// ==== Set Alarm Time =================================================
+		if ((strncmp(cmdCode, strSetAlarmTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
+
+			Send_Ok_Answer_Param(cmdCode, iCmdParam);
+			rx_cmd->f_cmd_received = 0;	
+			Set_Alarm_Time(iCmdParam);
+			return;
+		} 		
+		// ==== Set ESP ON Time =================================================
+		if ((strncmp(cmdCode, strSetEspOnTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
+
+			Send_Ok_Answer_Param(cmdCode, iCmdParam);
+			rx_cmd->f_cmd_received = 0;	
+			Set_ESP_On_Time_ms(iCmdParam);
+			return;
+		} 	
+
+		// ==== Get ESP ON Time === No Param ====================================
+		if ((strncmp(cmdCode, strGetEspOnTime, cmdCodeLen) == 0) && (cmdParamValid == 0)) { 
+
+			rx_cmd->f_cmd_received = 0;	
+			Get_ESP_On_Time_ms();
+			return;
+		} 		
+		
+		//=== Get Time ======= No Param ========================================
+		if ((strncmp(cmdCode, strGetDateTime, cmdCodeLen) == 0) && (cmdParamLen == 0)) { 
+			Send_Date_Time();			
 			rx_cmd->f_cmd_received = 0;	
 			return;
 		}
-		//========== No Param ====	
-		if ((strncmp(cmdCode, strGetDate, cmdCodeLen) == 0) && (cmdParamLen == 0)) { 
-		
-			Send_Ok_Answer(cmdCode);
+		//=== Get Alarm Time ======= No Param ========================================
+		if ((strncmp(cmdCode, strGetAlarmTime, cmdCodeLen) == 0) && (cmdParamLen == 0)) { 
+			Send_Alarm_Time();			
+			rx_cmd->f_cmd_received = 0;	
+			return;
+		}				
+		//=== Get Hot Ticks == No Param ========================================
+		if ((strncmp(cmdCode, strGetHotTicks, cmdCodeLen) == 0) && (cmdParamLen == 0)) { 
+			Send_Hot_Ticks();
 			rx_cmd->f_cmd_received = 0;	
 			return;	
-		}
+		}	
+		//=== Get Cold Ticks == No Param ========================================
+		if ((strncmp(cmdCode, strGetColdTicks, cmdCodeLen) == 0) && (cmdParamLen == 0)) { 
+			Send_Cold_Ticks();
+			rx_cmd->f_cmd_received = 0;	
+			return;	
+		}			
 		Send_Unknown_Cmd_Code_Answer(cmdCode);			
 		rx_cmd->f_cmd_received = 0;	
 	}
@@ -190,36 +195,64 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
 //====================================
 
 void StartUartLog(cmd_s_type * rx_cmd) {
-	sprintf(log_str1,  "%s%c" 							,"--------------------", 13);
-	sprintf(log_str2,  "%s%c" 							, "CMD available:", 13);
-	sprintf(log_str3,  "%s%c" 							,"--------------------", 13);	
-	sprintf(log_str4,  "%s%c" 						, "set_date{year mounth day}", 13);		
-	sprintf(log_str5,  "%s%c" 						, "example: set_date240521", 13);		
-	sprintf(log_str6,  "%s%c" 							,"--------------------", 13);
-	sprintf(log_str7,  "%s%c" 						, "set_time{hour min sec}", 13);	
-	sprintf(log_str8,  "%s%c" 						, "example: set_time183630", 13);		
-	sprintf(log_str9,  "%s%c" 							,"--------------------", 13);
-	sprintf(log_str10, "%s%c" 						, "get_date", 13);	
-	sprintf(log_str11, "%s%c" 						, "get_time", 13);	
-	sprintf(log_str12, "%s%c" 							,"--------------------", 13);
-	sprintf(rx_cmd->txBuff, "%s%s%s%s%s%s%s%s%s%s%s%s",
-		log_str1,
-		log_str2,
-		log_str3,
-		log_str4,	
-		log_str5,
-		log_str6,
-		log_str7,
-		log_str8,
-		log_str9,
-		log_str10,	
-		log_str11,
-		log_str12
+	int n = 0;
+	sprintf(log_str[n++],  "%s%c"   ,"--------------------", 13);          //  1
+	sprintf(log_str[n++],  "%s%c"   , "CMD available:", 13);               //  2
+	sprintf(log_str[n++],  "%s%c"   ,"--------------------", 13);          //  3
+	sprintf(log_str[n++],  "%s%c"   , "set_date{year mounth day}", 13);    //  4
+	sprintf(log_str[n++],  "%s%c"   , "example: set_date240521", 13);      //  5
+	sprintf(log_str[n++],  "%s%c"   ,"--------------------", 13);          //  6
+	sprintf(log_str[n++],  "%s%c"   , "set_time{hour min sec}", 13);       //  7
+	sprintf(log_str[n++],  "%s%c"   , "example: set_time183630", 13);      //  8
+	sprintf(log_str[n++],  "%s%c"   ,"--------------------", 13);          //  9
+	sprintf(log_str[n++],  "%s%c"   , "set_alarm_time{hour min sec}", 13); // 10
+	sprintf(log_str[n++],  "%s%c"   , "example: set_alarm_time22301", 13); // 11	
+	sprintf(log_str[n++],  "%s%c"   ,"--------------------", 13);          // 12
+	sprintf(log_str[n++],  "%s%c"   , "set_esp_on_ms", 13);                // 13
+	sprintf(log_str[n++],  "%s%c"   , "example: set_esp_on_ms5000", 13);   // 14	
+	sprintf(log_str[n++],  "%s%c"   ,"--------------------", 13);          // 15	
+	sprintf(log_str[n++], "%s%c"   , "get_time", 13);                      // 16
+	sprintf(log_str[n++], "%s%c"   ,"--------------------", 13);           // 17
+	sprintf(log_str[n++], "%s%c"   , "get_hot", 13);                       // 18
+	sprintf(log_str[n++], "%s%c"   ,"--------------------", 13);           // 19
+	sprintf(log_str[n++], "%s%c"   , "get_cold", 13);                      // 20
+	sprintf(log_str[n++], "%s%c"   ,"--------------------", 13);           // 21
+	sprintf(log_str[n++], "%s%c"   , "get_alarm_time", 13);                // 22
+	sprintf(log_str[n++], "%s%c"   ,"--------------------", 13);           // 23
+	sprintf(log_str[n++], "%s%c"   , "get_esp_on_ms", 13);                 // 24	
+	sprintf(log_str[n++], "%s%c"   ,"--------------------", 13);           // 25
+	n = 0;                                                                
+	sprintf(rx_cmd->txBuff, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",// 25 inch       
+   
+		log_str[n++],    //  1                                                    
+		log_str[n++],    //  2                                                   
+		log_str[n++],    //  3                                                   
+		log_str[n++],    //  4
+		log_str[n++],    //  5
+		log_str[n++],    //  6
+		log_str[n++],    //  7
+		log_str[n++],    //  8
+		log_str[n++],    //  9
+		log_str[n++],    // 10
+		log_str[n++],    // 11
+		log_str[n++],    // 12
+		log_str[n++],    // 13
+		log_str[n++],    // 14
+		log_str[n++],    // 15
+		log_str[n++],    // 16
+		log_str[n++],    // 17
+		log_str[n++],    // 18
+		log_str[n++],    // 19
+		log_str[n++],    // 20
+		log_str[n++],    // 21
+		log_str[n++],    // 22
+		log_str[n++],    // 23
+		log_str[n++],    // 24
+		log_str[n++]     // 25
 	);
 	rx_cmd->txBuffLen = strlen(rx_cmd->txBuff);
 	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)rx_cmd->txBuff, rx_cmd->txBuffLen);	
 }
-
 //====================================
 
 int CheckCmdCodeLen(cmd_s_type * rx_cmd) {
@@ -286,6 +319,5 @@ void DefinitionLastRxByte(cmd_s_type * rx_cmd) {
 			lastByteCheck.startFindLastByte = 0;
 		  HAL_UART_Receive_IT(&huart2, (uint8_t*)rx_cmd->rx_buff, 15);	
 	}
-	//HAL_UART_Receive_IT(&huart2, (uint8_t*)rx_cmd->rx_buff, 15);
 }
 //====================================
