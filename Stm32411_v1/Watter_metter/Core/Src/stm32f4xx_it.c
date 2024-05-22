@@ -229,6 +229,7 @@ void USART2_IRQHandler(void)
 
 		ReadNextUartByte(&rx_cmd);	
 	}
+	__HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE);
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */

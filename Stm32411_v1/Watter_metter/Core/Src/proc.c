@@ -24,10 +24,11 @@ void Get_ESP_On_Time_ms(void);
 void Send_Hot_Ticks(void);
 void Send_Cold_Ticks(void);
 void Send_Alarm_Time(void);	
-
-
+	
 void Esp_Power_On_For_N_ms(void);
 void Esp_Controller(void); 
+void ESP_Force_On(void);
+void ESP_Force_Off(void);
 //====================================
 	
 RTC_AlarmTypeDef sAlarm;  // have to be Global  !!!!!
@@ -212,7 +213,7 @@ void Send_Hot_Ticks(void) {
 
 void Send_Cold_Ticks(void) {
 	
-	sprintf(buf,"Hot_Ticks: %000000d%c", watter.input.hot_count, 13);	
+	sprintf(buf,"Cold_Ticks: %000000d%c", watter.input.cold_count, 13);	
 	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 }
 //====================================
@@ -297,4 +298,17 @@ void Get_ESP_On_Time_ms(void) {
 }
 //====================================
 
+void ESP_Force_On(void) {	
+	ESP_ON;
+	sprintf(buf,"Esp Force On %c", 13);	
+	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
+}
+//====================================
+
+void ESP_Force_Off(void) {	
+	ESP_OFF;
+	sprintf(buf,"Esp Force Off %c", 13);	
+	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
+}
+//====================================
 

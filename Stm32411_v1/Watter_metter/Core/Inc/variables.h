@@ -42,7 +42,6 @@ typedef struct {
 typedef struct {
 	uint8_t cmd_code;
 	uint16_t cmd_params;
-	uint8_t f_next_byte_received;	
 	uint8_t Buf_size;
 	uint8_t rx_buff[RX_CMD_BUFF_SIZE];
 	uint8_t rx_ready_buffer[RX_CMD_BUFF_SIZE];
