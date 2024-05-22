@@ -40,7 +40,7 @@ void Send_Cold_Ticks(void);
 void Send_Date_Time(void); 
 void Send_Alarm_Time(void);	
 
-void Send_Ok_Answer_v1(char * cmdPacket);
+void Send_Ok_Answer(char * cmdPacket);
 
 
 char log_str[30][80];
@@ -62,19 +62,8 @@ char strEspForceOff[]  = "esp_force_off";
 char strGetHotTicks[]   = "get_hot"; 
 char strGetColdTicks[] = "get_cold"; 
 //====================================
-void Send_Ok_Answer_Param(char * cmdCode, int iCmdParam) {
-	sprintf(buf, "%s%s%d%c" , "Cmd Ok -- ",  cmdCode, iCmdParam, 13);
-	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
-} 
-//====================================
 
-void Send_Ok_Answer(char * cmdCode) {	
-	sprintf(buf, "%s%s%c" , "Cmd Ok -- ",  cmdCode, 13);
-	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
-} 
-//====================================
-
-void Send_Ok_Answer_v1(char * cmdPacket) {	
+void Send_Ok_Answer(char * cmdPacket) {	
 	sprintf(buf, "%s%s%c" , "Packet Ok -- ",  cmdPacket, 13);
 	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 } 
@@ -132,7 +121,7 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
 		
 		// ==== Set Time =======================================================		
 		if ((strncmp(cmdPacket, strSetTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 			
-			Send_Ok_Answer_v1(cmdPacket);
+			Send_Ok_Answer(cmdPacket);
 			SetTime(iCmdParam);	
 			//Send_Date_Time();	
 			return;
@@ -140,20 +129,20 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
 		
 		// ==== Set Date =======================================================
 		if ((strncmp(cmdPacket, strSetDate, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
-			Send_Ok_Answer_v1(cmdPacket);	
+			Send_Ok_Answer(cmdPacket);	
 			SetDate(iCmdParam);
 			return;
 		} 
 		
 		// ==== Set Alarm Time =================================================
 		if ((strncmp(cmdPacket, strSetAlarmTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
-			Send_Ok_Answer_v1(cmdPacket);			
+			Send_Ok_Answer(cmdPacket);			
 			Set_Alarm_Time(iCmdParam);
 			return;
 		} 		
 		// ==== Set ESP ON Time =================================================
 		if ((strncmp(cmdPacket, strSetEspOnTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
-			Send_Ok_Answer_v1(cmdPacket);	
+			Send_Ok_Answer(cmdPacket);	
 			Set_ESP_On_Time_ms(iCmdParam);
 			return;
 		} 	
