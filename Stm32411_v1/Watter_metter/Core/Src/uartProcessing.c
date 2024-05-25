@@ -104,7 +104,7 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
          
 		cmdCodeLen = CheckCmdCodeLen(cmdPacket, packetLen);	//======
 		if (cmdCodeLen == 0)  {
-			Send_Cmd_Code_Zero_Len_Answer();
+			//Send_Cmd_Code_Zero_Len_Answer();
 			return;
 		}
 		// ===========================================================
@@ -183,7 +183,7 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
 			ESP_Force_Off();
 			return;	
 		}				
-		Send_Unknown_Cmd_Code_Answer(cmdPacket);	
+		//Send_Unknown_Cmd_Code_Answer(cmdPacket);	
 	}
 	DefinitionLastRxByte(rx_cmd);
 }

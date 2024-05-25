@@ -10,7 +10,7 @@
 //BUTTONS
 #define BUTTONS_DEBOUNCE_TIME_MS (3)
 //-----------
-#define ESP_ON_TIME_MS (3000)
+#define ESP_ON_TIME_MS (30000)
 
 //UART CMD
 #define RX_CMD_BUFF_SIZE (100)
@@ -18,5 +18,7 @@
 #define TIME_FOR_DEFINE_LAST_BYTE_MS (2)  
 #define UART_CMD_PROCESSING_TIME_MS  (1) 
 //-----------
+
+#define DEBUG_ESP_ALL_TIME_WORK (0)
 
 #endif 

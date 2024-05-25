@@ -116,7 +116,7 @@ void Send_Date_Time(void) {
 						sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,
 						watter.input.hot_count, watter.input.cold_count,
 						13);	
-	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
+	//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 }
 //====================================
 
@@ -132,6 +132,10 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
 	}
 	while(HAL_RTC_SetAlarm_IT(hrtc, &sAlarm, FORMAT_BIN)!=HAL_OK){}
 	*/
+	
+	
+	watter.input.hot_count ++;
+	watter.input.cold_count ++;
 	
 	Esp_Power_On_For_N_ms();
 }
@@ -198,22 +202,18 @@ void SetTime(uint32_t iTime) {
 }
 //====================================
 
-uint32_t Set_Cold_Ticks(void) {
-	
-	return watter.input.cold_count;
-}
-//====================================
-
 void Send_Hot_Ticks(void) {
 	
-	sprintf(buf,"Hot_Ticks: %000000d%c", watter.input.hot_count, 13);	
+	//sprintf(buf,"Hot_Ticks: %000000d%c", watter.input.hot_count, 13);	
+	sprintf(buf,"%d%c", watter.input.hot_count, 13);		
 	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 }
 //====================================
 
 void Send_Cold_Ticks(void) {
 	
-	sprintf(buf,"Cold_Ticks: %000000d%c", watter.input.cold_count, 13);	
+	//sprintf(buf,"Cold_Ticks: %000000d%c", watter.input.cold_count, 13);	
+	sprintf(buf,"%d%c", watter.input.cold_count, 13);		
 	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 }
 //====================================
@@ -237,7 +237,7 @@ void Esp_Power_On_For_N_ms(void) {
 						watter.input.hot_count, watter.input.cold_count,
 						13);
 						
-	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));		
+	//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));		
 }
 //====================================
 
@@ -245,25 +245,27 @@ void Esp_Controller(void) {
 	RTC_TimeTypeDef sTime;
 	RTC_DateTypeDef sDate;
 	
-	if ((watter.esp.isOn) && (HAL_GetTick() > watter.esp.timeOn + watter.esp.workMs)) {
-		watter.esp.isOn = 0;		
-		ESP_OFF;	
-		
-		//=======
-		HAL_RTC_GetTime(&hrtc, &sTime,              RTC_FORMAT_BIN);// RTC_FORMAT_BCD
-		HAL_RTC_GetDate(&hrtc, &sDate,              RTC_FORMAT_BIN);                  
-		HAL_RTC_GetAlarm(&hrtc,&sAlarm,RTC_ALARM_A, RTC_FORMAT_BIN); 
+	if (DEBUG_ESP_ALL_TIME_WORK == 0) {
+		if ((watter.esp.isOn) && (HAL_GetTick() > watter.esp.timeOn + watter.esp.workMs)) {
+			watter.esp.isOn = 0;		
+			ESP_OFF;	
 			
-		sprintf(buf,"ESP_OFF  Date %02d-%02d Time %02d:%02d:%02d  Alarm Time %02d:%02d:%02d    Hot:%d    Cold:%d%c", 
-						sDate.Date, sDate.Month, //sDate.Year,
-						sTime.Hours, sTime.Minutes, sTime.Seconds, 
-						sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,
-						watter.input.hot_count, watter.input.cold_count,
-						13);
-						
-		HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));		
-		//=======
-	}	
+			//=======
+			HAL_RTC_GetTime(&hrtc, &sTime,              RTC_FORMAT_BIN);// RTC_FORMAT_BCD
+			HAL_RTC_GetDate(&hrtc, &sDate,              RTC_FORMAT_BIN);                  
+			HAL_RTC_GetAlarm(&hrtc,&sAlarm,RTC_ALARM_A, RTC_FORMAT_BIN); 
+				
+			sprintf(buf,"ESP_OFF  Date %02d-%02d Time %02d:%02d:%02d  Alarm Time %02d:%02d:%02d    Hot:%d    Cold:%d%c", 
+							sDate.Date, sDate.Month, //sDate.Year,
+							sTime.Hours, sTime.Minutes, sTime.Seconds, 
+							sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,
+							watter.input.hot_count, watter.input.cold_count,
+							13);
+							
+			//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));		
+			//=======
+		}	
+	}
 }
 //====================================
 
@@ -283,8 +285,8 @@ void Send_Alarm_Time(void) {
 	HAL_RTC_GetAlarm(&hrtc, &sAlarm, RTC_ALARM_A, RTC_FORMAT_BIN);  
 	
 	sprintf(buf,"Alarm Time %02d:%02d:%02d%c", 
-		sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,	13);	
-	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
+	sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,	13);	
+	//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 }
 //====================================
 void Set_ESP_On_Time_ms(uint32_t iTime) {	
@@ -300,15 +302,15 @@ void Get_ESP_On_Time_ms(void) {
 
 void ESP_Force_On(void) {	
 	ESP_ON;
-	sprintf(buf,"Esp Force On %c", 13);	
-	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
+	//sprintf(buf,"Esp Force On %c", 13);	
+	//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 }
 //====================================
 
 void ESP_Force_Off(void) {	
 	ESP_OFF;
-	sprintf(buf,"Esp Force Off %c", 13);	
-	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
+	//sprintf(buf,"Esp Force Off %c", 13);	
+	//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 }
 //====================================
 
