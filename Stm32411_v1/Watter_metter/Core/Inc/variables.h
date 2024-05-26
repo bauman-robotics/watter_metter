@@ -35,7 +35,8 @@ typedef struct {
 typedef struct {
 	uint32_t timeOn;
 	uint32_t workMs;
-	bool 	 isOn;
+	bool 	   isOn;
+	uint32_t repeat_interval_sec;
 } espPowerType;
 //====================================
 

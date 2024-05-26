@@ -121,7 +121,7 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
 		
 		// ==== Set Time =======================================================		
 		if ((strncmp(cmdPacket, strSetTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 			
-			Send_Ok_Answer(cmdPacket);
+			//Send_Ok_Answer(cmdPacket);
 			SetTime(iCmdParam);	
 			//Send_Date_Time();	
 			return;
@@ -136,13 +136,13 @@ void CmdRxProcessing(cmd_s_type * rx_cmd, watter_type *wattere) {
 		
 		// ==== Set Alarm Time =================================================
 		if ((strncmp(cmdPacket, strSetAlarmTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
-			Send_Ok_Answer(cmdPacket);			
+			//Send_Ok_Answer(cmdPacket);			
 			Set_Alarm_Time(iCmdParam);
 			return;
 		} 		
 		// ==== Set ESP ON Time =================================================
 		if ((strncmp(cmdPacket, strSetEspOnTime, cmdCodeLen) == 0) && (cmdParamValid == 1)) { 
-			Send_Ok_Answer(cmdPacket);	
+			//Send_Ok_Answer(cmdPacket);	
 			Set_ESP_On_Time_ms(iCmdParam);
 			return;
 		} 	

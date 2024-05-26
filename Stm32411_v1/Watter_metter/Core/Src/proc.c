@@ -29,10 +29,13 @@ void Esp_Power_On_For_N_ms(void);
 void Esp_Controller(void); 
 void ESP_Force_On(void);
 void ESP_Force_Off(void);
+
+//HAL_RTC_AlarmAEventCallback();
+
 //====================================
 	
 RTC_AlarmTypeDef sAlarm;  // have to be Global  !!!!!
-
+int repeat_interval_sec = 100; // 100 => 1 min, 00 sec 
 //====================================
 
 uint32_t IntToHex(uint32_t iDate) {
@@ -133,11 +136,16 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
 	while(HAL_RTC_SetAlarm_IT(hrtc, &sAlarm, FORMAT_BIN)!=HAL_OK){}
 	*/
 	
-	
-	watter.input.hot_count ++;
-	watter.input.cold_count ++;
-	
+	if (DEBUG_INCREMENT_MODE) {
+		watter.input.hot_count ++;
+		watter.input.cold_count ++;
+	}	
 	Esp_Power_On_For_N_ms();
+	SetTime(0);
+	Set_Alarm_Time(REPIAT_INTERVAL);
+
+
+
 }
 //====================================
 
@@ -249,6 +257,7 @@ void Esp_Controller(void) {
 		if ((watter.esp.isOn) && (HAL_GetTick() > watter.esp.timeOn + watter.esp.workMs)) {
 			watter.esp.isOn = 0;		
 			ESP_OFF;	
+			SetTime(0); // Test
 			
 			//=======
 			HAL_RTC_GetTime(&hrtc, &sTime,              RTC_FORMAT_BIN);// RTC_FORMAT_BCD
@@ -270,7 +279,9 @@ void Esp_Controller(void) {
 //====================================
 
 void Set_Alarm_Time(uint32_t iTime) {
-	
+	RTC_TimeTypeDef sTime;
+	HAL_RTC_GetTime(&hrtc, &sTime,              RTC_FORMAT_BIN);
+	HAL_RTC_GetAlarm(&hrtc, &sAlarm, RTC_ALARM_A,FORMAT_BIN);	
 	sAlarm.AlarmTime.Hours   = (uint8_t)(iTime / 10000); 
 	sAlarm.AlarmTime.Minutes = (uint8_t)((iTime - sAlarm.AlarmTime.Hours * 10000) / 100);
 	sAlarm.AlarmTime.Seconds = (uint8_t)((iTime - sAlarm.AlarmTime.Hours * 10000) - sAlarm.AlarmTime.Minutes * 100);
@@ -281,12 +292,18 @@ void Set_Alarm_Time(uint32_t iTime) {
 //====================================
 
 void Send_Alarm_Time(void) {
-	
+	uint32_t time = 0;
 	HAL_RTC_GetAlarm(&hrtc, &sAlarm, RTC_ALARM_A, RTC_FORMAT_BIN);  
 	
-	sprintf(buf,"Alarm Time %02d:%02d:%02d%c", 
-	sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,	13);	
+	//sprintf(buf,"Alarm Time %02d:%02d:%02d%c", 
+	//sAlarm.AlarmTime.Hours, sAlarm.AlarmTime.Minutes, sAlarm.AlarmTime.Seconds,	13);	
 	//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
+	
+	time = (uint32_t)sAlarm.AlarmTime.Hours * 10000;
+	time += (uint32_t)sAlarm.AlarmTime.Minutes * 100;
+	time += (uint32_t)sAlarm.AlarmTime.Seconds;
+	sprintf(buf,"%d%c", time, 13);		
+	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)buf, strlen(buf));	
 }
 //====================================
 void Set_ESP_On_Time_ms(uint32_t iTime) {	
