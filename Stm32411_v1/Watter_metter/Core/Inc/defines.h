@@ -8,7 +8,7 @@
 
 //-----------
 //BUTTONS
-#define BUTTONS_DEBOUNCE_TIME_MS (3)
+#define BUTTONS_DEBOUNCE_TIME_MS (3000)
 //-----------
 #define ESP_ON_TIME_MS (30000)
 
@@ -21,7 +21,7 @@
 
 #define DEBUG_ESP_ALL_TIME_WORK (0)
 
-#define REPIAT_INTERVAL (100) // 100 => 1 min, 00 sec 
-#define DEBUG_INCREMENT_MODE (1)
+#define REPIAT_INTERVAL (100) // 100 => 1 min, 00 sec // repeat wake-up esp8266 every 1 min, if it does not send values to server
+#define DEBUG_INCREMENT_MODE (0)
 
 #endif 

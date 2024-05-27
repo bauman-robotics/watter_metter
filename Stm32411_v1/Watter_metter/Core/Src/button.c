@@ -105,9 +105,9 @@ void ButtonsProcessing(void) {
 	if ((watter.input.hot_state == 0) && (watter.input.old_hot_state == 1)){   
 		 watter.input.hot_count ++;
 	}
-	if ((watter.input.hot_state == 1) && (watter.input.old_hot_state == 0)){   
-		 watter.input.hot_count ++;
-	}
+//	if ((watter.input.hot_state == 1) && (watter.input.old_hot_state == 0)){   
+//		 watter.input.hot_count ++;
+//	}
 	
 	if (watter.input.hot_state == 0) {
 		watter.input.old_hot_state = 0;
@@ -119,9 +119,9 @@ void ButtonsProcessing(void) {
 	if ((watter.input.cold_state == 0) && (watter.input.old_cold_state == 1)){   
 		 watter.input.cold_count ++;
 	}
-	if ((watter.input.cold_state == 1) && (watter.input.old_cold_state == 0)){   
-		 watter.input.cold_count ++;
-	}
+//	if ((watter.input.cold_state == 1) && (watter.input.old_cold_state == 0)){   
+//		 watter.input.cold_count ++;
+//	}
 	
 	if (watter.input.cold_state == 0) {
 		watter.input.old_cold_state = 0;
