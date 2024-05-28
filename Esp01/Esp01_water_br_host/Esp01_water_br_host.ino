@@ -25,7 +25,7 @@
 
 //===========================
 String user_id       = "Andrey";
-String user_location = "Home";
+String user_location = "Office";
 String apiKeyValue   = "xxxxxx";
 int cold             = -1;
 int hot              = -1;
@@ -83,9 +83,10 @@ void setup() {
 		alarm_interval = alarm_interval - 100 + 60 - wakeUpTime;
 	}
 	//=========	
-	if (alarm_interval < 0) {
+	if (alarm_interval < 100) {
 		alarm_interval = 100;	// 1 min	
 	}
+ alarm_interval = 200;
 	//=========	
 	sprintf(buf, "%s%d", "set_alarm_time", alarm_interval);
 	Serial.print(buf);
