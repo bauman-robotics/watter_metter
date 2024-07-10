@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#define SERIAL_PRINT_DEBUG_EN (1)
 
 //#include <SoftwareSerial.h>; ///
 ///-------------------------------
@@ -43,103 +44,94 @@ String user_location = "Home";
 String apiKeyValue = "xxxxxx";
 int cold = -1;
 int hot = -1;
-int alarm_time = 1245;
+int alarm_interval   = 200; // 200 - 2 min, 00 sec
 		
 char buf_cold[80];
 char buf_hot[80];
 
+unsigned long wakeUpTime;
+time_t now; 
+struct tm timeinfo;
+
+WiFiClient client;
+HTTPClient http;
+
 int readline(uint8_t readch, char *buffer, int len);
+int GetCold(void); 
+int GetHot(void);
+void Serial_Flush_Buffer(void);
+int Send_Post_Request(int cold, int hot, int alarm_interval);
+bool ConnectToWifi(void);
 //====================================================================
 
 void setup() {
-  Serial.begin(9600);
-  
-  WiFi.begin(ssid, password);
-  Serial.println("Connecting");
-  while(WiFi.status() != WL_CONNECTED) { 
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
-  Serial.println(WiFi.localIP());
+	bool conn = 0;
+	char buf[100];
+	Serial_Flush_Buffer();
+	conn = ConnectToWifi();
+	int httpResponseCode = 0;
+	if (conn) {
+		cold = GetCold();		
+		delay(100);
+		Serial_Flush_Buffer();
+		hot = GetHot();
+		
+		httpResponseCode = Send_Post_Request(cold, hot, alarm_interval);		
+		
+	}
+	delay(100);
+	Serial.print("set_time0");
+	delay(100);
+	//=========
+	wakeUpTime = millis() / 1000;
+	if (alarm_interval > wakeUpTime) {
+		alarm_interval = alarm_interval - 100 + 60 - wakeUpTime;
+	}
+	//=========	
+	if (alarm_interval < 100) {
+		alarm_interval = 100;	// 1 min	
+	}
+	alarm_interval = 200;
+	//=========	
+	sprintf(buf, "%s%d", "set_alarm_time", alarm_interval);
+	Serial.print(buf);
+	//=========	
+	delay(100);      
+	Serial.print("esp_force_off");		
 }
 //====================================================================
-
 void loop() {
-	//Check WiFi connection status
-	if ( WiFi.status() == WL_CONNECTED ) {
-		WiFiClient client;
-		HTTPClient http;
+}
 
-		// Your Domain name with URL path or IP address with path
-		http.begin(client, serverName);
+//====================================================================
 
-		// Specify content-type header
-		http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-		//======================================
-		cold = -1;
-		hot = -1;
-		
-		int httpResponseCode = 200;
-		
-		delay(1000);
-		for (int n=0; n<10; n++) {
-			Serial.write("get_cold", 8);
-			if (readline(Serial.read(), buf_cold, 80) > 0) {
-				cold  = atoi(buf_cold);
-				//Serial.write(buf, strlen(buf));
-				break;
-			}	
-			delay(100);
-		}
-
-		delay(1000);
-
-		for (int n=0; n<10; n++) { 
-			Serial.write("get_hot", 7);
-			if (readline(Serial.read(), buf_hot, 80) > 0) {
-				hot  = atoi(buf_hot);
-				//Serial.write(buf, strlen(buf));
-				break;
-			}
-			delay(100);
-		}
-
-		//======================================
-		if ((cold != -1) && (hot != -1)) {
-			// Prepare your HTTP POST request data
-			String httpRequestData = "api_key=" + apiKeyValue + "&user_id=" + user_id
-						  + "&user_location=" + user_location + "&cold=" + String(cold)
-						  + "&hot=" + String(hot) + "&alarm_time=" + String(alarm_time) + ""; 
-						  
-			// Send HTTP POST request
-			httpResponseCode = http.POST(httpRequestData); 
-			  
-			alarm_time ++;     
-
-			//======================================
-
-			http.end();
-		}
-		
-		
-		if (httpResponseCode==200) {
-			delay(1000);
-			Serial.write("set_time0", 9);
-			delay(1000);
-			Serial.write("set_alarm_time100", 17);
-			delay(1000);			
-			Serial.write("esp_force_off", 13);
-		} 
-		
+bool ConnectToWifi(void) {
+	bool conn = 1;
+	
+	if (SERIAL_PRINT_DEBUG_EN) {
+		Serial.begin(9600);
+		Serial.println();
+		Serial.print("Connecting to ");
+		Serial.println(ssid);	
 	}
-	else {
-		Serial.println("WiFi Disconnected");
+	
+	WiFi.begin(ssid, password);
+	
+	while(WiFi.status() != WL_CONNECTED) { 
+		delay(500);
+		if (SERIAL_PRINT_DEBUG_EN) {
+			Serial.print(".");
+		}
 	}
-
-	//Send an HTTP POST request every 10 seconds
-	delay(5000); 
+	
+	if (SERIAL_PRINT_DEBUG_EN) {	
+		Serial.println("");
+		Serial.print("Connected to WiFi network with IP Address: ");
+		Serial.println(WiFi.localIP());
+	}
+	
+	conn = WiFi.status();
+	return conn;
 }
 //====================================================================
 
@@ -160,6 +152,12 @@ int readline(uint8_t readch, char *buffer, int len) {
 		if ((readch >= '0') && (readch <= '9') && (pos < len-1)) {
 			buffer[pos] = readch;
 			pos++;		
+		} 
+		//===================	
+		if ((readch < '0') && (readch > '9')) {
+			pos = 0;
+			buffer[pos] = 0;
+			rpos = 0;
 		}
 		//===================
 		if (pos >= len-1) {
@@ -170,3 +168,84 @@ int readline(uint8_t readch, char *buffer, int len) {
     }
     return 0;
 }
+//====================================================================
+
+int GetCold(void) {
+	char buf_cold[80] = {0};
+	int cold = -1;
+	//==================
+	Serial_Flush_Buffer();
+	//==================
+	for (int n=0; n<10; n++) {
+		Serial.print("get_cold");
+		delay(100);
+		if (readline(Serial.read(), buf_cold, 80) > 0) {
+			cold  = atoi(buf_cold);
+			//==================
+			if (SERIAL_PRINT_DEBUG_EN) {
+				Serial.print(cold);
+			}
+			//==================
+			break;
+		}	
+	}
+	return cold;
+}
+//====================================================================
+
+int GetHot(void) {
+	char buf_hot[80] = {0};
+	int hot = -1;
+	//==================
+	Serial_Flush_Buffer();
+	//==================	
+	for (int n=0; n<10; n++) {
+		Serial.print("get_hot");
+		delay(100);
+		if (readline(Serial.read(), buf_hot, 80) > 0) {
+			hot  = atoi(buf_hot);
+			//==================
+			if (SERIAL_PRINT_DEBUG_EN) {
+				Serial.print(hot);
+			}
+			//==================
+			break;
+		}	
+	}
+	return hot;
+}
+//====================================================================
+void Serial_Flush_Buffer(void) {
+    while (Serial.available()){
+		  Serial.read();
+    }
+}
+//====================================================================
+
+int Send_Post_Request(int cold, int hot, int alarm_interval) {
+	int httpResponseCode = 200;
+	
+	// Your Domain name with URL path or IP address with path
+	http.begin(client, serverName);
+
+	// Specify content-type header
+	http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+	//======================================
+
+	// Prepare your HTTP POST request data
+	String httpRequestData = "api_key=" + apiKeyValue + "&user_id=" + user_id
+				  + "&user_location=" + user_location + "&cold=" + String(cold)
+				  + "&hot=" + String(hot) + "&alarm_time=" + String(alarm_interval) + ""; 
+				  
+	// Send HTTP POST request
+	httpResponseCode = http.POST(httpRequestData); 
+
+	//======================================
+
+	http.end();
+
+	return httpResponseCode;
+
+}
+//====================================================================
